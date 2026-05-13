@@ -2,13 +2,19 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_URL
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
   build:
     commands:
-      - docker build -t $ECR_REPO_URL:latest ./backend
+      - echo Build started on `date`
+      - mvn clean package
+      - docker build -t $ECR_REPO:latest .
+      - docker tag $ECR_REPO:latest $ECR_REPO:$IMAGE_TAG
   post_build:
     commands:
-      - docker push $ECR_REPO_URL:latest
-      - printf '[{"name":"backend","imageUri":"%s"}]' $ECR_REPO_URL:latest > imagedefinitions.json
+      - echo Build completed on `date`
+      - docker push $ECR_REPO:latest
+      - docker push $ECR_REPO:$IMAGE_TAG
+      - printf '[{"name":"backend","imageUri":"%s"}]' $ECR_REPO:$IMAGE_TAG > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json

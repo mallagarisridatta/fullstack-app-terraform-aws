@@ -3,10 +3,11 @@ phases:
   install:
     runtime-versions:
       nodejs: 18
+  pre_build:
+    commands:
+      - npm install
   build:
     commands:
-      - cd frontend
-      - npm install
       - npm run build
   post_build:
     commands:
@@ -14,4 +15,3 @@ phases:
 artifacts:
   files:
     - '**/*'
-  base-directory: frontend/build

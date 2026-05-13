@@ -1,0 +1,35 @@
+pipeline:
+  name: Fullstack-App-Deploy
+  identifier: FullstackAppDeploy
+  projectIdentifier: Default_Project
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Infrastructure
+        identifier: Infrastructure
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: TerraformPlan
+                  name: TF Plan
+                  identifier: TF_Plan
+                  spec:
+                    configuration:
+                      type: Inline
+                      spec:
+                        workingDirectory: terraform/environments/prod
+    - stage:
+        name: Deploy
+        identifier: Deploy
+        type: Deployment
+        spec:
+          serviceConfig:
+            serviceRef: fullstack_service
+          infrastructure:
+            environmentRef: prod_env
+            infrastructureDefinition:
+              type: AwsEcs

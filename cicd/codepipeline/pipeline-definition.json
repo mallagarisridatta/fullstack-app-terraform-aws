@@ -1,0 +1,51 @@
+{
+  "pipeline": {
+    "name": "FullstackAppPipeline",
+    "roleArn": "arn:aws:iam::ACCOUNT_ID:role/CodePipelineRole",
+    "artifactStore": {
+      "type": "S3",
+      "location": "codepipeline-artifacts-bucket"
+    },
+    "stages": [
+      {
+        "name": "Source",
+        "actions": [
+          {
+            "name": "Source",
+            "actionTypeId": {
+              "category": "Source",
+              "owner": "AWS",
+              "provider": "CodeStarSourceConnection",
+              "version": "1"
+            },
+            "outputArtifacts": [ { "name": "SourceArtifact" } ],
+            "configuration": {
+              "ConnectionArn": "arn:aws:codestar-connections:region:account:connection/id",
+              "FullRepositoryId": "mallagarisridatta/fullstack-app-terraform-aws",
+              "BranchName": "main"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Build",
+        "actions": [
+          {
+            "name": "BuildApp",
+            "actionTypeId": {
+              "category": "Build",
+              "owner": "AWS",
+              "provider": "CodeBuild",
+              "version": "1"
+            },
+            "inputArtifacts": [ { "name": "SourceArtifact" } ],
+            "outputArtifacts": [ { "name": "BuildArtifact" } ],
+            "configuration": {
+              "ProjectName": "AppBuildProject"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
