@@ -16,8 +16,8 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "mfa_delete_enabled" {
-  description = "Whether MFA delete is enabled for the S3 bucket. Note: Requires manual CLI activation with MFA token."
-  type        = bool
-  default     = true
+variable "mfa_delete_status" {
+  description = "Status of MFA delete for S3 bucket"
+  type        = string
+  default     = "Enabled"
 }

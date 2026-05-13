@@ -1,19 +1,17 @@
 terraform {
-  required_version = "~> 1.5"
-
+  required_version = ">= 1.5.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
   }
-
-  # Assuming Terraform Enterprise/Cloud Workspace
+  # Remote backend configuration for Terraform Enterprise/Cloud
   backend "remote" {
-    # organization = "your-org-name"
-    # workspaces {
-    #   name = "enterprise-stack-prod"
-    # }
+    organization = "your-org-name"
+    workspaces {
+      name = "fullstack-app-prod"
+    }
   }
 }
 
@@ -23,9 +21,8 @@ provider "aws" {
   default_tags {
     tags = {
       Environment = var.environment
-      Project     = "FullstackApp"
+      Project     = "FullStackApp"
       ManagedBy   = "Terraform"
-      Owner       = "CloudArchitectureTeam"
     }
   }
 }

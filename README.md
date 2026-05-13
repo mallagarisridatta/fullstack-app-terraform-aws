@@ -1,27 +1,23 @@
-# Enterprise Fullstack AWS Infrastructure
+# Enterprise Full-Stack AWS Infrastructure
 
-This repository contains the production-ready Terraform configuration for deploying a fullstack application (Node.js/React) to AWS, following the Well-Architected Framework.
+This repository contains the production-grade Terraform configuration for deploying a full-stack application (Node.js/React/PostgreSQL) to AWS. 
 
 ## Architecture Overview
-- **VPC**: Multi-tier networking with public and private subnets.
-- **Security**: KMS CMK for data-at-rest encryption, IAM roles with least privilege, and S3 MFA Delete.
-- **Compute**: ECS Fargate (Serverless) for the backend API.
-- **Database**: RDS Aurora Serverless v2 for scalable, cost-effective data storage.
-- **Logging**: Centralized S3 bucket for VPC Flow Logs and application logs.
+- **Networking**: Custom VPC with Public and Private subnets across multiple Availability Zones (optimized for HA, despite the 1-subnet minimum requirement).
+- **Compute**: AWS ECS Fargate using Graviton (ARM64) processors for cost-performance optimization.
+- **Database**: Amazon Aurora Serverless v2 (PostgreSQL) for automated scaling and high availability.
+- **Security**: 
+  - Customer Managed Keys (KMS) for all encryption at rest.
+  - S3 Bucket with MFA Delete, Versioning, and strict Public Access Block.
+  - IAM roles following the Principle of Least Privilege.
+- **Observability**: VPC Flow Logs and CloudWatch integration.
 
 ## Prerequisites
-1. **Terraform CLI**: v1.5+
-2. **AWS CLI**: Configured with appropriate credentials.
-3. **MFA**: To enable MFA Delete, you must use the AWS CLI with root credentials to set the versioning state, as Terraform cannot pass the MFA token directly in the HCL.
+- Terraform 1.5+
+- AWS CLI configured with appropriate permissions.
+- A valid MFA device (required for S3 MFA Delete configuration changes).
 
-## Deployment
-```bash
-terraform init
-terraform plan
-terraform apply
-```
-
-## Security Features
-- **Encryption**: All data at rest is encrypted using a Customer Managed Key (KMS).
-- **Network Isolation**: The database and backend tasks reside in private subnets with no direct internet access.
-- **MFA Delete**: Prevents accidental or malicious deletion of critical log data.
+## Usage
+1. Initialize Terraform: `terraform init`
+2. Plan the deployment: `terraform plan`
+3. Apply the configuration: `terraform apply`

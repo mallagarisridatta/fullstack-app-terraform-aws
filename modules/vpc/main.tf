@@ -8,10 +8,11 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = "enterprise-vpc-${var.environment}"
+    Name = "vpc-${var.environment}"
   }
 }
 
+# Requirement: 1 Public Subnet
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 1)
@@ -24,6 +25,7 @@ resource "aws_subnet" "public" {
   }
 }
 
+# Requirement: 1 Private Subnet
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 8, 10)
@@ -31,6 +33,18 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "private-subnet-1"
+    Type = "Private"
+  }
+}
+
+# Note: Aurora requires at least 2 AZs for DB Subnet Groups
+resource "aws_subnet" "private_secondary" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = cidrsubnet(var.vpc_cidr, 8, 11)
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+  tags = {
+    Name = "private-subnet-2-db-only"
     Type = "Private"
   }
 }
@@ -54,10 +68,27 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_flow_log" "main" {
-  log_destination      = "arn:aws:s3:::${var.log_bucket_id}"
-  log_destination_type = "s3"
-  traffic_type         = "ALL"
-  vpc_id               = aws_vpc.main.id
+  iam_role_arn    = aws_iam_role.flow_log.arn
+  log_destination = var.log_bucket_arn
+  traffic_type    = "ALL"
+  vpc_id          = aws_vpc.main.id
+}
+
+resource "aws_iam_role" "flow_log" {
+  name = "vpc-flow-log-role-${var.environment}"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "vpc-flow-logs.amazonaws.com"
+        }
+      }
+    ]
+  })
 }
 
 output "vpc_id" {
@@ -69,5 +100,5 @@ output "public_subnets" {
 }
 
 output "private_subnets" {
-  value = [aws_subnet.private.id]
+  value = [aws_subnet.private.id, aws_subnet.private_secondary.id]
 }
