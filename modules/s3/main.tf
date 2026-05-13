@@ -1,24 +1,21 @@
 resource "aws_s3_bucket" "logs" {
   bucket        = var.bucket_name
-  force_destroy = false # Prevent accidental deletion of logs
+  force_destroy = false
 
-  tags = {
-    Name = var.bucket_name
+  lifecycle {
+    prevent_destroy = true
   }
 }
 
-# MFA Delete and Versioning
-# Note: To fully enable MFA Delete, you must use the AWS CLI with MFA credentials.
-resource "aws_s3_bucket_versioning" "logs_versioning" {
+resource "aws_s3_bucket_versioning" "logs" {
   bucket = aws_s3_bucket.logs.id
   versioning_configuration {
     status     = "Enabled"
-    mfa_delete = "Enabled"
+    mfa_delete = var.mfa_delete_enabled ? "Enabled" : "Disabled"
   }
 }
 
-# Encryption at Rest using KMS
-resource "aws_s3_bucket_server_side_encryption_configuration" "logs_encryption" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
 
   rule {
@@ -26,12 +23,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs_encryption" 
       kms_master_key_id = var.kms_key_arn
       sse_algorithm     = "aws:kms"
     }
-    bucket_key_enabled = true
   }
 }
 
-# Block Public Access (CIS Benchmark)
-resource "aws_s3_bucket_public_access_block" "logs_access" {
+resource "aws_s3_bucket_public_access_block" "logs" {
   bucket = aws_s3_bucket.logs.id
 
   block_public_acls       = true
@@ -40,8 +35,7 @@ resource "aws_s3_bucket_public_access_block" "logs_access" {
   restrict_public_buckets = true
 }
 
-# Lifecycle policy to transition logs to cheaper storage
-resource "aws_s3_bucket_lifecycle_configuration" "logs_lifecycle" {
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
 
   rule {
@@ -57,4 +51,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs_lifecycle" {
       days = 90
     }
   }
+}
+
+output "bucket_id" {
+  value = aws_s3_bucket.logs.id
 }

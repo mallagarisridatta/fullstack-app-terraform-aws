@@ -1,18 +1,23 @@
 # Current System State Summary
 
 ## Networking (VPC)
-- **VPC ID**: `vpc-xxxxxxxx` (Managed by Terraform)
+- **VPC ID**: Managed by Terraform (`aws_vpc.main`)
 - **CIDR Block**: `10.0.0.0/16`
 - **Subnets**:
-  - `Public Subnet 1`: `10.0.0.0/24` (Internet Gateway attached)
-  - `Private Subnet 1`: `10.0.10.0/24` (Isolated, ready for NAT/Internal resources)
-- **Flow Logs**: Enabled, streaming all traffic metadata to the S3 logging bucket.
+  - `Public Subnet 1`: `10.0.1.0/24` (AZ: `us-east-1a`, IGW attached)
+  - `Private Subnet 1`: `10.0.10.0/24` (AZ: `us-east-1a`, Isolated)
+- **Flow Logs**: Enabled, streaming to S3 logging bucket.
 
 ## Storage & Security (S3 & KMS)
-- **Log Bucket**: `enterprise-stack-prod-logs-<account-id>`
-  - **Encryption**: AES-256 via Customer Managed KMS Key (`alias/enterprise-stack-s3-key`).
+- **Log Bucket**: `enterprise-stack-prod-logs`
+  - **Encryption**: AWS KMS (CMK) with automatic rotation.
   - **Versioning**: Enabled.
-  - **MFA Delete**: Configuration set to `Enabled` (Requires CLI confirmation).
-  - **Public Access**: Fully blocked (All 4 settings).
-  - **Lifecycle**: 30-day transition to Standard-IA, 90-day expiration.
-- **KMS Key**: Dedicated CMK with automatic rotation enabled and policy allowing VPC Flow Log delivery service access.
+  - **MFA Delete**: Enabled (Requires root MFA for deletion via CLI).
+  - **Public Access**: Fully blocked.
+  - **Lifecycle**: 30-day transition to IA, 90-day expiration.
+- **KMS Key**: Dedicated Customer Managed Key (CMK) for VPC Flow Logs, S3, and RDS encryption.
+
+## Application Infrastructure (Planned/Provisioned)
+- **Database**: RDS Aurora PostgreSQL (Serverless v2) in private subnets.
+- **Compute**: ECS Fargate Cluster running Node.js backend (ARM64/Graviton).
+- **Frontend**: React application (to be served via S3/CloudFront).

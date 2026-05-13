@@ -1,19 +1,17 @@
-resource "aws_kms_key" "s3_key" {
-  description             = "KMS key for S3 log encryption"
+resource "aws_kms_key" "main" {
+  description             = "Primary CMK for Fullstack App Encryption"
   deletion_window_in_days = 30
-  enable_key_rotation     = true # Security Best Practice
+  enable_key_rotation     = true
 
   policy = data.aws_iam_policy_document.kms_policy.json
-
-  tags = {
-    Name = "${var.project_name}-s3-kms-key"
-  }
 }
 
-resource "aws_kms_alias" "s3_key_alias" {
-  name          = "alias/${var.project_name}-s3-key"
-  target_key_id = aws_kms_key.s3_key.key_id
+resource "aws_kms_alias" "main" {
+  name          = "alias/enterprise-stack-key"
+  target_key_id = aws_kms_key.main.key_id
 }
+
+data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "kms_policy" {
   statement {
@@ -35,14 +33,16 @@ data "aws_iam_policy_document" "kms_policy" {
       identifiers = ["delivery.logs.amazonaws.com"]
     }
     actions = [
-      "kms:Encrypt",
-      "kms:Decrypt",
+      "kms:Encrypt*",
+      "kms:Decrypt*",
       "kms:ReEncrypt*",
       "kms:GenerateDataKey*",
-      "kms:DescribeKey"
+      "kms:Describe*"
     ]
     resources = ["*"]
   }
 }
 
-data "aws_caller_identity" "current" {}
+output "key_arn" {
+  value = aws_kms_key.main.arn
+}

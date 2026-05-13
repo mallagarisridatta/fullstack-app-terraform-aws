@@ -5,7 +5,7 @@ variable "aws_region" {
 }
 
 variable "environment" {
-  description = "Deployment environment (e.g., prod, staging)"
+  description = "Deployment environment"
   type        = string
   default     = "prod"
 }
@@ -16,8 +16,8 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "project_name" {
-  description = "Name of the project"
-  type        = string
-  default     = "enterprise-stack"
+variable "mfa_delete_enabled" {
+  description = "Whether MFA delete is enabled for the S3 bucket. Note: Requires manual CLI activation with MFA token."
+  type        = bool
+  default     = true
 }
