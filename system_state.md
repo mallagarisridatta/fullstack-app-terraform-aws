@@ -1,23 +1,21 @@
 # Current System State Summary
 
 ## Networking (VPC)
-- **VPC ID**: Managed by Terraform (`aws_vpc.main`)
-- **CIDR Block**: `10.0.0.0/16`
+- **VPC ID**: `aws_vpc.main` (CIDR: `10.0.0.0/16`)
 - **Subnets**:
-  - `Public Subnet 1`: `10.0.1.0/24` (AZ: `us-east-1a`, IGW attached)
-  - `Private Subnet 1`: `10.0.10.0/24` (AZ: `us-east-1a`, NAT Gateway access)
-- **Flow Logs**: Enabled, streaming to S3 logging bucket.
+  - `Public Subnet`: `10.0.1.0/24` (Route to IGW)
+  - `Private Subnet`: `10.0.10.0/24` (Route to NAT Gateway)
+- **Flow Logs**: Enabled, destination S3 bucket.
 
-## Storage & Security (S3 & KMS)
-- **Log Bucket**: `enterprise-stack-prod-logs` (Unique suffix applied)
-  - **Encryption**: AWS KMS (CMK) with automatic rotation.
-  - **Versioning**: Enabled.
-  - **MFA Delete**: Enabled.
-  - **Public Access**: Fully blocked.
-  - **Lifecycle**: 30-day transition to IA, 90-day expiration.
-- **KMS Key**: Dedicated Customer Managed Key (CMK) for VPC Flow Logs, S3, and RDS encryption.
+## Storage & Security
+- **Log Bucket**: `prod-enterprise-logs-<account_id>`
+  - **Versioning**: Enabled
+  - **MFA Delete**: Enabled
+  - **Encryption**: KMS (SSE-KMS) using CMK
+  - **Public Access**: Blocked (All 4 settings)
+- **KMS Key**: Customer Managed Key with automatic rotation enabled.
 
-## Application Infrastructure
-- **Database**: RDS Aurora PostgreSQL (Serverless v2) in private subnets.
-- **Compute**: ECS Fargate Cluster running Node.js backend (ARM64/Graviton).
-- **Frontend**: React application (S3 + CloudFront distribution).
+## CI/CD
+- **Jenkins**: Pipeline defined in `cicd/jenkins/Jenkinsfile`.
+- **AWS CodePipeline**: Definition in `cicd/codepipeline/pipeline-definition.json`.
+- **Harness**: Configuration in `.harness/pipeline.yaml`.
