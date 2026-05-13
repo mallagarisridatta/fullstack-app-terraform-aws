@@ -8,12 +8,16 @@
 - **Flow Logs**: Enabled, destination S3 bucket.
 
 ## Storage & Security
-- **Log Bucket**: `prod-enterprise-logs-<account_id>`
+- **Log Bucket**: `prod-enterprise-logs-${data.aws_caller_identity.current.account_id}`
   - **Versioning**: Enabled
   - **MFA Delete**: Enabled
   - **Encryption**: KMS (SSE-KMS) using CMK
   - **Public Access**: Blocked (All 4 settings)
 - **KMS Key**: Customer Managed Key with automatic rotation enabled.
+
+## Compute & Database
+- **ECS Cluster**: `enterprise-app-cluster` (Fargate)
+- **Database**: Aurora Serverless v2 (PostgreSQL) in private subnets.
 
 ## CI/CD
 - **Jenkins**: Pipeline defined in `cicd/jenkins/Jenkinsfile`.

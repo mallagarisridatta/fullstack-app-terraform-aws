@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        AWS_DEFAULT_REGION = 'us-east-1'
-        TF_IN_AUTOMATION = 'true'
+        AWS_REGION = 'us-east-1'
+        TF_WORKSPACE = 'prod'
     }
     stages {
         stage('Checkout') {
@@ -12,21 +12,21 @@ pipeline {
         }
         stage('Terraform Plan') {
             steps {
-                dir('terraform/environments/prod') {
+                dir('terraform') {
                     sh 'terraform init'
-                    sh 'terraform plan'
+                    sh 'terraform plan -out=tfplan'
                 }
             }
         }
         stage('Approval') {
             steps {
-                input 'Deploy to Production?'
+                input 'Apply changes to production?'
             }
         }
         stage('Terraform Apply') {
             steps {
-                dir('terraform/environments/prod') {
-                    sh 'terraform apply -auto-approve'
+                dir('terraform') {
+                    sh 'terraform apply -auto-approve tfplan'
                 }
             }
         }

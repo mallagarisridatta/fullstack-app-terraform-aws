@@ -1,32 +1,34 @@
 pipeline:
-  name: Enterprise-IaC-Pipeline
-  identifier: EnterpriseIaCPipeline
+  name: FullStackDeploy
+  identifier: FullStackDeploy
   projectIdentifier: Default_Project
   orgIdentifier: default
-  tags: {}
   stages:
     - stage:
-        name: Terraform-Deploy
-        identifier: TerraformDeploy
-        description: ""
-        type: Deployment
+        name: Infrastructure
+        identifier: Infrastructure
+        type: Custom
         spec:
-          deploymentType: Terraform
-          infrastructure:
-            environmentRef: prod
-            infrastructureDefinition:
-              type: AwsCloud
-              spec:
-                connectorRef: aws-connector
-                region: us-east-1
           execution:
             steps:
               - step:
                   type: TerraformPlan
-                  name: Plan
-                  identifier: Plan
-              - step:
-                  type: TerraformApply
-                  name: Apply
-                  identifier: Apply
-        tags: {}
+                  name: TF Plan
+                  spec:
+                    configuration:
+                      type: Inline
+                      spec:
+                        workingDirectory: terraform
+    - stage:
+        name: Deploy_Backend
+        identifier: Deploy_Backend
+        type: Deployment
+        spec:
+          serviceConfig:
+            serviceRef: backend_service
+          infrastructure:
+            environmentRef: prod_env
+            infrastructureDefinition:
+              type: AwsEcs
+              spec:
+                cluster: enterprise-app-cluster

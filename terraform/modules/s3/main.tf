@@ -1,8 +1,9 @@
 resource "aws_s3_bucket" "logs" {
-  bucket        = "${var.environment}-enterprise-logs-${var.account_id}"
-  force_destroy = false
+  bucket = var.bucket_name
 
-  tags = var.tags
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_versioning" "logs_versioning" {
@@ -24,7 +25,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logs_encryption" 
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "logs_access" {
+resource "aws_s3_bucket_public_access_block" "logs_pab" {
   bucket = aws_s3_bucket.logs.id
 
   block_public_acls       = true
@@ -33,20 +34,5 @@ resource "aws_s3_bucket_public_access_block" "logs_access" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "logs_lifecycle" {
-  bucket = aws_s3_bucket.logs.id
-
-  rule {
-    id     = "log-retention"
-    status = "Enabled"
-
-    transition {
-      days          = 30
-      storage_class = "STANDARD_IA"
-    }
-
-    expiration {
-      days = 90
-    }
-  }
-}
+variable "bucket_name" {}
+variable "kms_key_arn" {}
