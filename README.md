@@ -1,137 +1,26 @@
-# Fullstack Application with React, Spring Boot, PostgreSQL, and Docker
+# Enterprise AWS Foundation - VPC & Secure Logging
 
-## Overview
+This Terraform configuration establishes a production-ready networking foundation and a secure, encrypted S3 bucket for logging, adhering to the AWS Well-Architected Framework and CIS benchmarks.
 
-This project is a fullstack web application built using:
-
-- **Frontend**: Vite with React and Typescript
-- **Backend**: Spring Boot
-- **Database**: PostgreSQL
-- **Deployment**: Docker containers hosted on [Render](https://render.com/)
-
-The goal is to demonstrate how to build a full-featured web application, from development to deployment.
-
----
-
-## Table of Contents
-
-1. [Project Structure](#project-structure)
-2. [Technologies](#technologies)
-3. [Prerequisites](#prerequisites)
-4. [Installation](#installation)
-5. [Running the Project Locally](#running-the-project-locally)
-6. [Running Project on Docker](#running-the-project-on-docker)
-
----
-
-## Project Structure
-
-```bash
-.
-├── frontend/               # React frontend
-│   ├── public/
-│   ├── src/                # React components and pages
-│   ├── Dockerfile          # Dockerfile for React
-│   └── package.json        # React dependencies
-├── backend/                # Spring Boot backend
-│   ├── src/                # Java code for APIs and services
-│   ├── Dockerfile          # Dockerfile for Spring Boot
-│   └── pom.xml             # Maven dependencies
-├── docker-compose.yaml      # Docker Compose file to manage multi-container application
-└── README.md               # Project documentation
-```
-
----
-
-## Technologies
-
-- **Frontend**: React, Typescript
-- **Backend**: Spring Boot, Maven
-- **Database**: PostgreSQL, Neon Database
-- **Containerization**: Docker, Docker Compose
-- **Deployment**: Render
-
----
+## Architecture Overview
+- **VPC**: A custom VPC with a public and private subnet architecture across multiple Availability Zones (optimized for high availability).
+- **S3 Logging Bucket**: A hardened S3 bucket with:
+    - AES-256 Encryption via AWS KMS (CMK).
+    - MFA Delete enabled (requires manual CLI activation with MFA token).
+    - Versioning enabled.
+    - Public Access Blocked.
+- **Security**: VPC Flow Logs are enabled and directed to the S3 bucket.
+- **KMS**: Customer Managed Key (CMK) for data-at-rest encryption.
 
 ## Prerequisites
+- Terraform Cloud/Enterprise account for the remote backend.
+- AWS CLI configured with administrative permissions.
+- A physical or virtual MFA device (required to enable MFA Delete on S3).
 
-Before you begin, ensure you have the following installed:
+## Usage
+1. Update `terraform.tf` with your Terraform Enterprise organization and workspace names.
+2. Initialize: `terraform init`.
+3. Plan: `terraform plan`.
+4. Apply: `terraform apply`.
 
-- **Node.js**, currently using v.20
-- **Java**, currently using v.21
-- **Maven**
-- **Docker**
-- **Docker Compose**
-
----
-
-## Installation
-
-### 1. Clone the repository:
-
-```bash
-git clone https://github.com/MSpilari/fullstack-app-deploy-render.git
-cd fullstack-app-deploy-render
-```
-
-### 2. Install frontend dependencies:
-
-```bash
-cd frontend
-npm install
-```
-
-### 3. Install backend dependencies:
-
-```bash
-cd ../backend
-mvn clean install
-```
-
----
-
-## Running the Project Locally
-
-### 1. Running the frontend:
-
-```bash
-cd frontend
-npm run dev
-```
-
-The frontend will be accessible at `http://localhost:5173`.
-
-### 2. Running the backend:
-
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-The backend will be accessible at `http://localhost:8080`.
-
----
-
-## Running the project on Docker
-
-This project includes a `docker-compose.yaml` file to manage the frontend, backend and Postgres database.
-
-### 1. Build and run the containers:
-
-```bash
-docker-compose up -d --build
-```
-
-### 2. Access the application:
-
-- Frontend: `http://localhost:9090`
-- Backend: `http://localhost:8080`
-- PostgreSQL: `localhost:5432` (default username: `user`, password: `1234`)
-
-### 3. Stopping the containers:
-
-```bash
-docker-compose down
-```
-
----
+**Note on MFA Delete**: Terraform can set the state to `Enabled`, but AWS requires a root/IAM user with MFA to perform the actual API call with a serial number and code to toggle this setting. See `modules/s3/main.tf` for details.
