@@ -2,13 +2,13 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_FE
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO_FRONTEND
   build:
     commands:
-      - docker build -t $ECR_REPO_FE:latest ./frontend
+      - docker build -t $ECR_REPO_FRONTEND:latest .
   post_build:
     commands:
-      - docker push $ECR_REPO_FE:latest
-      - printf '[{"name":"frontend","imageUri":"%s"}]' $ECR_REPO_FE:latest > imagedefinitions.json
+      - docker push $ECR_REPO_FRONTEND:latest
+      - printf '[{"name":"frontend","imageUri":"%s"}]' $ECR_REPO_FRONTEND:latest > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json

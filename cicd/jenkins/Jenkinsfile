@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         AWS_REGION = 'us-east-1'
-        TF_WORKSPACE = 'prod'
+        TF_WORKSPACE = 'fullstack-app-prod'
     }
     stages {
         stage('Checkout') {
@@ -18,15 +18,29 @@ pipeline {
                 }
             }
         }
-        stage('Approval') {
-            steps {
-                input 'Apply changes to production?'
-            }
-        }
         stage('Terraform Apply') {
+            when {
+                branch 'main'
+            }
             steps {
                 dir('terraform') {
                     sh 'terraform apply -auto-approve tfplan'
+                }
+            }
+        }
+        stage('Build & Push Backend') {
+            steps {
+                dir('backend') {
+                    sh 'docker build -t backend-app .'
+                    // Add ECR push logic here
+                }
+            }
+        }
+        stage('Build & Push Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'docker build -t frontend-app .'
+                    // Add ECR push logic here
                 }
             }
         }

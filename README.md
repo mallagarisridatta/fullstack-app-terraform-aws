@@ -1,23 +1,20 @@
-# Enterprise Full-Stack AWS Infrastructure
+# Enterprise Fullstack AWS Infrastructure
 
-This repository contains the production-ready Infrastructure as Code (IaC) and CI/CD configurations for a full-stack application. 
+This repository contains the production-ready IaC for a fullstack application using AWS, Terraform, and CI/CD pipelines.
 
 ## Architecture Overview
-- **Networking**: Custom VPC with Public and Private subnets across 1 Availability Zone (expandable to Multi-AZ).
-- **Compute**: AWS ECS Fargate running on Graviton2 (ARM64) for cost-optimization.
-- **Database**: Amazon RDS Aurora Serverless v2 (PostgreSQL).
-- **Security**: 
-  - KMS Customer Managed Keys (CMK) for encryption at rest.
-  - S3 Log Bucket with MFA Delete and Versioning enabled.
-  - IAM roles following the Principle of Least Privilege.
-- **CI/CD**: Multi-tool support including Jenkins, AWS CodePipeline, and Harness.
+- **VPC**: 1 Public Subnet (IGW), 1 Private Subnet (NAT Gateway).
+- **Compute**: ECS Fargate (Graviton-ready) for Frontend and Backend.
+- **Database**: Aurora Serverless v2 (PostgreSQL).
+- **Security**: KMS CMK for S3 and RDS encryption. S3 Log bucket with MFA Delete enabled.
+- **CI/CD**: Support for Jenkins, AWS CodePipeline, and Harness.
 
 ## Prerequisites
-- Terraform >= 1.5.0
+- Terraform 1.5+
 - AWS CLI configured with appropriate permissions.
-- A valid MFA device (required for S3 MFA Delete operations).
+- MFA token (required for S3 MFA Delete configuration changes).
 
 ## Deployment
 1. Initialize Terraform: `terraform init`
-2. Plan changes: `terraform plan`
-3. Apply: `terraform apply` (Note: Enabling MFA Delete requires MFA headers in the AWS request).
+2. Plan: `terraform plan`
+3. Apply: `terraform apply` (Note: MFA token required for S3 bucket changes).

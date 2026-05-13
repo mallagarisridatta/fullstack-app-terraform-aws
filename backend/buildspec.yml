@@ -5,12 +5,10 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REPO
   build:
     commands:
-      - docker build -t $ECR_REPO:latest ./backend
-      - docker tag $ECR_REPO:latest $ECR_REPO:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - docker build -t $ECR_REPO:latest .
   post_build:
     commands:
       - docker push $ECR_REPO:latest
-      - docker push $ECR_REPO:$CODEBUILD_RESOLVED_SOURCE_VERSION
-      - printf '[{"name":"backend","imageUri":"%s"}]' $ECR_REPO:$CODEBUILD_RESOLVED_SOURCE_VERSION > imagedefinitions.json
+      - printf '[{"name":"backend","imageUri":"%s"}]' $ECR_REPO:latest > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json

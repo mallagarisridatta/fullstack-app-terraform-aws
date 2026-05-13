@@ -1,20 +1,12 @@
 version: 0.2
-
 phases:
   install:
     commands:
-      - tf_version="1.5.7"
-      - wget https://releases.hashicorp.com/terraform/${tf_version}/terraform_${tf_version}_linux_amd64.zip
-      - unzip terraform_${tf_version}_linux_amd64.zip
+      - curl -s -qL -o terraform.zip https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+      - unzip terraform.zip
       - mv terraform /usr/local/bin/
-  pre_build:
-    commands:
-      - cd terraform/environments/prod
-      - terraform init
   build:
     commands:
-      - terraform plan -out=tfplan
-      - terraform apply -auto-approve tfplan
-artifacts:
-  files:
-    - terraform/environments/prod/tfplan
+      - cd terraform
+      - terraform init
+      - terraform apply -auto-approve

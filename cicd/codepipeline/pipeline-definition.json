@@ -1,7 +1,7 @@
 {
   "pipeline": {
     "name": "EnterpriseAppPipeline",
-    "roleArn": "arn:aws:iam::123456789012:role/CodePipelineServiceRole",
+    "roleArn": "arn:aws:iam::ACCOUNT_ID:role/CodePipelineRole",
     "artifactStore": {
       "type": "S3",
       "location": "codepipeline-artifacts-bucket"
@@ -9,38 +9,43 @@
     "stages": [
       {
         "name": "Source",
-        "actions": [{
-          "name": "Source",
-          "actionTypeId": {
-            "category": "Source",
-            "owner": "ThirdParty",
-            "provider": "GitHub",
-            "version": "1"
-          },
-          "outputArtifacts": [{"name": "SourceArtifact"}],
-          "configuration": {
-            "Owner": "mallagarisridatta",
-            "Repo": "fullstack-app-terraform-aws",
-            "Branch": "main"
+        "actions": [
+          {
+            "name": "Source",
+            "actionTypeId": {
+              "category": "Source",
+              "owner": "ThirdParty",
+              "provider": "GitHub",
+              "version": "1"
+            },
+            "outputArtifacts": [ { "name": "SourceArtifact" } ],
+            "configuration": {
+              "Owner": "mallagarisridatta",
+              "Repo": "fullstack-app-terraform-aws",
+              "Branch": "main",
+              "OAuthToken": "{{resolve:secretsmanager:github-token:secret-string:token}}"
+            }
           }
-        }]
+        ]
       },
       {
         "name": "Build",
-        "actions": [{
-          "name": "BuildBackend",
-          "actionTypeId": {
-            "category": "Build",
-            "owner": "AWS",
-            "provider": "CodeBuild",
-            "version": "1"
-          },
-          "inputArtifacts": [{"name": "SourceArtifact"}],
-          "outputArtifacts": [{"name": "BuildArtifact"}],
-          "configuration": {
-            "ProjectName": "BackendBuildProject"
+        "actions": [
+          {
+            "name": "BuildApp",
+            "actionTypeId": {
+              "category": "Build",
+              "owner": "AWS",
+              "provider": "CodeBuild",
+              "version": "1"
+            },
+            "inputArtifacts": [ { "name": "SourceArtifact" } ],
+            "outputArtifacts": [ { "name": "BuildArtifact" } ],
+            "configuration": {
+              "ProjectName": "EnterpriseAppBuild"
+            }
           }
-        }]
+        ]
       }
     ]
   }
