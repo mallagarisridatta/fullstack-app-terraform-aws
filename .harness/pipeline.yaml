@@ -1,9 +1,8 @@
 pipeline:
-  name: FullstackAppDeployment
-  identifier: FullstackAppDeployment
+  name: Fullstack-App-Deploy
+  identifier: FullstackAppDeploy
   projectIdentifier: Default_Project
   orgIdentifier: default
-  tags: {}
   stages:
     - stage:
         name: Infrastructure
@@ -15,24 +14,8 @@ pipeline:
               - step:
                   type: TerraformPlan
                   name: TF Plan
-                  identifier: TF_Plan
                   spec:
                     configuration:
                       type: Inline
                       spec:
-                        workingDirectory: terraform
-    - stage:
-        name: Deploy_App
-        identifier: Deploy_App
-        type: Deployment
-        spec:
-          service:
-            serviceRef: fullstack_service
-          environment:
-            environmentRef: prod_env
-          execution:
-            steps:
-              - step:
-                  type: EcsBlueGreen
-                  name: ECS Blue Green
-                  identifier: EcsBlueGreen
+                        workingDirectory: terraform/environments/prod
